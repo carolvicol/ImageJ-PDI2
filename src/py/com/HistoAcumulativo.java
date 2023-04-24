@@ -6,7 +6,7 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
-public class ComputeHistogram implements PlugInFilter{
+public class HistoAcumulativo implements PlugInFilter{
 	
 	ImagePlus imp;
 	
@@ -16,24 +16,19 @@ public class ComputeHistogram implements PlugInFilter{
 	}
 
 	public void run(ImageProcessor ip) {
-		int[] h = new int[256];
-		//int[] h_mod = new int[256];
-		int M = ip.getWidth();
-		int N = ip.getHeight();
+		int [] h= ip.getHistogram();
+		int K= h.length;
 		
-		for(int v = 0; v < N; v++){
-			for(int u = 0; u < M; u++){
-				int i = ip.getPixel(u, v);
-				h[i] = h[i] + 1;
-			}
+		//Ejercicio 1 
+		for(int i = 1; i < K; i++){
+				h[i] = h[i] + h[i-1];
 		}
-		
-
+		//	
 		System.out.println(Arrays.toString(h));
 		// ... histogram h can now be used
 
 		// create the histogram image:
-		ImageProcessor hip = new ByteProcessor(255, 100);
+		ImageProcessor hip = new ByteProcessor(K, 150);
 		hip.setValue(255); // white = 255
 		hip.fill();
 
@@ -43,16 +38,16 @@ public class ComputeHistogram implements PlugInFilter{
 		
 		//Obtener la frecuencia mas alta del vector h
 		int ma = maximo(h);
-		for(int x = 0; x < 256; x++){
-			int esc = (h[x]*100)/ma;
+		for(int x = 0; x < K; x++){
+			int esc = (h[x]*150)/ma;
 			for(int y = 0; y<=esc; y++){
-				hip.putPixel(x, 100-y, 0);
+				hip.putPixel(x, 150-y, 0);
 			}
 		}
 		
 		// compose a nice title:
 		String imTitle = imp.getShortTitle();
-		String histTitle = "Histo de " + imTitle;
+		String histTitle = "Histo Acumulativo de " + imTitle;
 
 		// display the histogram image:
 		ImagePlus him = new ImagePlus(histTitle, hip);
@@ -69,4 +64,6 @@ public class ComputeHistogram implements PlugInFilter{
 		}
 		return maxi;
 	}
+
+	
 }
